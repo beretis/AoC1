@@ -1,3 +1,4 @@
+
 fun main() {
 
     fun part1(text: String): Long {
@@ -31,6 +32,11 @@ fun main() {
                 }
             }
         var resultingArrayOfRanges: MutableList<LongRange> = seedRanges
+        seedRanges.forEach { range ->
+
+        }
+
+
         transformationMachines.forEach { machine ->
             resultingArrayOfRanges = machine.transformRange(resultingArrayOfRanges).toMutableList()
             println("resultArray: $resultingArrayOfRanges")
