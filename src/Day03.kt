@@ -42,13 +42,65 @@ fun main() {
                     resultingNumbers.add(value)
                 }
             }
+        }
+        println("resultingNumbers: $resultingNumbers")
+        return resultingNumbers.sum()
+    }
 
+    fun part2(input: List<String>): Int {
+        val numberRegex = Regex("""[0-9]+""")
+        val symbolRegex = Regex("""\*""")
+        var resultingNumbers: MutableList<Int> = mutableListOf()
+        input.forEachIndexed { index, line ->
+            val allLineGears = symbolRegex.findAll(line).map { Pair(it.range.first, it.range.first) }.toMap()
+            val allLineNumbers = numberRegex.findAll(line).map { Triple(it.value.toInt(), it.range.first, it.range.last) }
+            allLineGears.values.forEach { gearIndex ->
+                gearIndex.println()
+                var gearRatioPair: MutableList<Int> = mutableListOf()
+                //check left
+                if (gearIndex > 0) {
+                    val leftNumber = allLineNumbers.firstOrNull { it.third == gearIndex - 1 }
+                    if (leftNumber != null) {
+                        gearRatioPair.add(leftNumber.first)
+                    }
+                }
+                //check right
+                if (gearIndex < line.length - 1) {
+                    val rightNumber = allLineNumbers.firstOrNull { it.second == gearIndex + 1 }
+                    if (rightNumber != null) {
+                        gearRatioPair.add(rightNumber.first)
+                    }
+                }
+                //check above
+                if (index > 0) {
+                    val aboveLine = input[index - 1]
+                    val aboveNumbers = numberRegex.findAll(aboveLine).map { Triple(it.value.toInt(), it.range.first, it.range.last) }
+                    for (number in aboveNumbers) {
+                        if (gearIndex in number.second - 1..number.third + 1) {
+                            gearRatioPair.add(number.first)
+                        }
+                    }
+                }
+                //check below
+                if (index < input.size - 1) {
+                    val belowLine = input[index + 1]
+                    val belowNumbers = numberRegex.findAll(belowLine).map { Triple(it.value.toInt(), it.range.first, it.range.last) }
+                    for (number in belowNumbers) {
+                        if (gearIndex in number.second - 1..number.third + 1) {
+                            gearRatioPair.add(number.first)
+                        }
+                    }
+                }
+                if (gearRatioPair.size == 2) {
+                    resultingNumbers.add(gearRatioPair.reduce { acc, i -> acc * i })
+                }
+            }
         }
         println("resultingNumbers: $resultingNumbers")
         return resultingNumbers.sum()
     }
 
     val input = readInput("Day03")
-    val result = part1(input)
+    val result = part2(input)
     println("result = $result")
 }

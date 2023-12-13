@@ -31,16 +31,25 @@ fun main() {
                     transformationMachines.last().transformation[range] = offset
                 }
             }
-        var resultingArrayOfRanges: MutableList<LongRange> = seedRanges
-        seedRanges.forEach { range ->
-
-        }
-
-
+        var resultingArrayOfRanges: MutableList<LongRange> = mutableListOf()
+//        seedRanges.forEach { seedRange ->
+//            var round = 0
+//            var intermediateArrayOfRanges: MutableList<LongRange> = mutableListOf<LongRange>(seedRange)
+//            transformationMachines.forEach { machine ->
+//                intermediateArrayOfRanges = machine.transformRange(intermediateArrayOfRanges).toMutableList()
+//                println("intermediateArrayOfRanges: $intermediateArrayOfRanges")
+//                round++
+//            }
+//            resultingArrayOfRanges.addAll(intermediateArrayOfRanges)
+//        }
+        var round = 0
+        var intermediateArrayOfRanges: MutableList<LongRange> = mutableListOf<LongRange>(seedRanges[0])
         transformationMachines.forEach { machine ->
-            resultingArrayOfRanges = machine.transformRange(resultingArrayOfRanges).toMutableList()
-            println("resultArray: $resultingArrayOfRanges")
+            intermediateArrayOfRanges = machine.transformRange(intermediateArrayOfRanges).toMutableList()
+            println("intermediateArrayOfRanges: $intermediateArrayOfRanges for machine $machine")
+            round++
         }
+        resultingArrayOfRanges.addAll(intermediateArrayOfRanges)
 
         return resultingArrayOfRanges.map { it.start }.min()
     }
@@ -87,22 +96,16 @@ class TransformationMachine() {
             var intersect = inputRange.intersect(transRange.key)
             if (intersect.isNotEmpty()) {
                 val intersectedRange = intersect.min() .. intersect.max()
-                if (intersectedRange.count() != inputRange.count()) {
-                    if (inputRange.first == intersectedRange.first || inputRange.last == intersectedRange.last) { //Split into two ranges
-                        val wtf = inputRange - intersectedRange
-                        splitRanges.add(transform(wtf.min()) .. transform(wtf.max()))
-                    } else { //Split into 3 ranges
-                        splitRanges.add(transform(inputRange.min()) .. transform(intersectedRange.min() - 1))
-                        splitRanges.add(transform(intersectedRange.max() + 1) .. transform(inputRange.max()))
-                    }
-                } else {
-                    //not splitting into more ranges
-                    splitRanges.add(transform(intersect.min()) .. transform(intersect.max()))
-                }
-                splitRanges.add(intersectedRange)
+                val transformedIntersectedRange = (intersect.min() - transRange.value .. intersect.max() - transRange.value)
+                splitRanges.add(transformedIntersectedRange)
             } else {
-                println()
+                println("missed range: $inputRange for transformation $transRange")
             }
+        }
+        val transformedRangesSize = splitRanges.map { it.count() }.reduce { acc, i -> acc + i }
+        if (transformedRangesSize < inputRange.count()) {
+            // Add the missing range
+
         }
         if (splitRanges.isEmpty()) {
             splitRanges.add(inputRange)
